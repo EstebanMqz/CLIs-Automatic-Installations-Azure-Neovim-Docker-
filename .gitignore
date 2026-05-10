@@ -1,0 +1,11 @@
+# Ignore log files and temporary files
+*.log
+*.tmp
+# Ignore environment files
+.env
+*.key
+*.pem
+# Ignore version control directories
+.svn/
+.hg/
+.bzr/
