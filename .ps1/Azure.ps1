@@ -1,10 +1,21 @@
 # Requires -RunAsAdministrator
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 Write-Host "Checking for Azure (Az) module..." -ForegroundColor Cyan
 
-if (-not (Get-Module -Name Az -ListAvailable)) {
-    Write-Host "Installing Az module..." -ForegroundColor Yellow
-    Install-Module -Name Az -AllowClobber -Scope AllUsers -Force
+try {
+    if (-not (Get-Module -Name Az -ListAvailable -ErrorAction SilentlyContinue)) {
+        Write-Host "Ensuring NuGet provider is available..." -ForegroundColor Yellow
+        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null
+        
+        Write-Host "Installing Az module..." -ForegroundColor Yellow
+        Install-Module -Name Az -AllowClobber -Scope AllUsers -Force -Confirm:$false
+    }
+}
+catch {
+    Write-Error "Failed to install the Az module: $($_.Exception.Message)"
+    exit 1
 }
 
 # 1. Correctly retrieve the module base path (using the first match if multiple exist)
