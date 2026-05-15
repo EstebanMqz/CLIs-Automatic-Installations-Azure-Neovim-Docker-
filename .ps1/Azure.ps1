@@ -1,11 +1,35 @@
-#Module installation and autocompletion setup for Az module in PowerShell
-Install-Module -Name Az -AllowClobber -Scope AllUsers
-#Import the module to enable autocompletion
-$azModulePath = (Get-Module -Name Az -ListAvailable).ModuleBase
-#Add the module path to the environment variable for autocompletion
-$env:PATH += ";$azModulePath"
-#Open the PowerShell profile to add the module import command for autocompletion
-notepad $PROFILE
-#Add Microsoft.PowerShell_profile.ps1
-$env:PATH += ";$azModulePath"
-#Save and close the profile file
+# Requires -RunAsAdministrator
+
+Write-Host "Checking for Azure (Az) module..." -ForegroundColor Cyan
+
+if (-not (Get-Module -Name Az -ListAvailable)) {
+    Write-Host "Installing Az module..." -ForegroundColor Yellow
+    Install-Module -Name Az -AllowClobber -Scope AllUsers -Force
+}
+
+# 1. Correctly retrieve the module base path (using the first match if multiple exist)
+$azModule = Get-Module -Name Az -ListAvailable | Select-Object -First 1
+
+if ($null -eq $azModule) {
+    Write-Error "Az module installation failed or could not be located."
+    exit 1
+}
+
+$azModulePath = $azModule.ModuleBase
+Write-Host "Az module located at: $azModulePath" -ForegroundColor Green
+
+# 2. Programmatically update the PowerShell Profile for persistence
+$profileDir = Split-Path -Parent $PROFILE
+if (-not (Test-Path $profileDir)) {
+    New-Item -Path $profileDir -ItemType Directory -Force | Out-Null
+}
+if (-not (Test-Path $PROFILE)) {
+    New-Item -Path $PROFILE -ItemType File -Force | Out-Null
+}
+
+# Append the Import-Module command to the profile if it's not already there
+$importCmd = "Import-Module Az"
+if ((Get-Content $PROFILE) -notcontains $importCmd) {
+    Add-Content -Path $PROFILE -Value "`n# Azure Module Autoloader`n$importCmd"
+    Write-Host "Added 'Import-Module Az' to your PowerShell profile." -ForegroundColor Cyan
+}
