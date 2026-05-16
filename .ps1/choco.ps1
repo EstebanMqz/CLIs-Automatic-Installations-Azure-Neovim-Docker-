@@ -1,14 +1,3 @@
-#requires -RunAsAdministrator
-# Self-elevate to Administrator if not already elevated
-if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Write-Host "Elevation required for Chocolatey installation. Requesting UAC..." -ForegroundColor Yellow
-    Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
-    exit
-}
-
-Set-StrictMode -Version Latest
-$ErrorActionPreference = "Inquire"
-
 <#
 .SYNOPSIS
     Installs the Chocolatey package manager on Windows.
@@ -22,11 +11,21 @@ $ErrorActionPreference = "Inquire"
     Skips the "already installed" check and re-runs the installer (useful for repairs).
 
 .NOTES
-    Author  : AI Assistant
-    Version : 1.0.0
-    License : MIT
-    Source  : https://community.chocolatey.org/install.ps1
+    Author  : EstebanMqz
+    License : Apache-2.0
+    Source  : https://github.com/EstebanMqz/CLIs-Automatic-Installations-Azure-Neovim-Docker-/blob/main/.ps1/choco.ps1
 #>
+
+#requires -RunAsAdministrator
+# Self-elevate to Administrator if not already elevated
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host "Elevation required for Chocolatey installation. Requesting UAC..." -ForegroundColor Yellow
+    Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 param(
     [switch]$Force
@@ -81,4 +80,3 @@ finally {
     # Restore original progress preference
     $ProgressPreference = $TempProgressPreference
 }
-

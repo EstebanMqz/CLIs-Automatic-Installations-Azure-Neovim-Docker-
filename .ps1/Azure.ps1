@@ -1,3 +1,18 @@
+<#
+.SYNOPSIS
+    Installs the Azure PowerShell module on Windows.
+
+.DESCRIPTION
+    Automates the installation of the Azure (Az) module. 
+    Includes administrative privilege checks, NuGet provider enforcement, 
+    scoped installation, and persistent profile configuration for module autoloading and error handling. Doesn´t add the module to the system PATH, as it is imported via the PowerShell natively and all their cmdlets for autocompletion and loading.
+
+.NOTES
+    Author  : EstebanMqz
+    License : Apache-2.0
+    Source  : https://github.com/EstebanMqz/CLIs-Automatic-Installations-Azure-Neovim-Docker-/blob/main/.ps1/Azure.ps1
+#>
+
 # Self-elevate to Administrator if not already elevated
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "Administrator privileges required for Azure module setup. Requesting UAC..." -ForegroundColor Yellow
@@ -6,7 +21,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 Set-StrictMode -Version Latest
-$ErrorActionPreference = "Inquire"
+$ErrorActionPreference = "Stop"
 
 Write-Host "Checking for Azure (Az) module..." -ForegroundColor Cyan
 
@@ -45,11 +60,11 @@ if (-not (Test-Path $PROFILE)) {
 }
 
 # Append the Import-Module command to the profile if it's not already there
-$importCmd = "Import-Module Az"
+$importCmd = "Import-Module Az -DisableNameChecking"
 if (Test-Path $PROFILE) {
     $profileContent = Get-Content $PROFILE -Raw
     if ($profileContent -notmatch "Import-Module\s+Az") {
         Add-Content -Path $PROFILE -Value "`n# Azure Module Autoloader`n$importCmd"
-        Write-Host "Added 'Import-Module Az' to your PowerShell profile." -ForegroundColor Cyan
+        Write-Host "Added 'Import-Module Az -DisableNameChecking' to your PowerShell profile." -ForegroundColor Cyan
     }
 }

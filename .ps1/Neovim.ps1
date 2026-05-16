@@ -1,3 +1,18 @@
+<#
+.SYNOPSIS
+    Installs Neovim on Windows.
+
+.DESCRIPTION
+    Automates the installation of Neovim includes administrative privilege checks, automated cleanup of old versions,
+    extraction to a standard directory (C:\Neovim), and system-wide PATH updates
+    to allow 'nvim' command usage from any terminal. The script also handles progress suppression for faster downloads and ensures a clean installation.
+
+.NOTES
+    Author  : EstebanMqz
+    License : Apache-2.0
+    Source  : https://github.com/EstebanMqz/CLIs-Automatic-Installations-Azure-Neovim-Docker-/blob/main/.ps1/Neovim.ps1
+#>
+
 # Self-elevate to Administrator if not already elevated
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "Administrator privileges required to modify System PATH. Elevating..." -ForegroundColor Yellow
@@ -6,7 +21,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 Set-StrictMode -Version Latest
-$ErrorActionPreference = "Inquire"
+$ErrorActionPreference = "Stop"
 
 # 1. Download Neovim
 $neovimUrl = "https://github.com/neovim/neovim/releases/latest/download/nvim-win64.zip"
