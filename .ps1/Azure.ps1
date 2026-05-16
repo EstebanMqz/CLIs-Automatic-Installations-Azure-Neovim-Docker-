@@ -1,3 +1,8 @@
+# Then, add the line `Import-Module -Name Az` to the profile script and save it. This way, the module will be imported every time you start a new PowerShell session, and autocompletion will be available without needing to import the module manually each time.
+# By following these steps, you can easily install a PowerShell module that provides autocompletion for commands and parameters, enhancing your productivity in the PowerShell console.
+# #Could you chain all the necessary commands together to install the module and enable autocompletion in one go?
+# Certainly! You can chain the necessary commands together in a single line to install the module, import it, and enable autocompletion. Here's how you can do it for the `Az` module but chained together.
+
 # Requires -RunAsAdministrator
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
@@ -40,7 +45,10 @@ if (-not (Test-Path $PROFILE)) {
 
 # Append the Import-Module command to the profile if it's not already there
 $importCmd = "Import-Module Az"
-if ((Get-Content $PROFILE) -notcontains $importCmd) {
-    Add-Content -Path $PROFILE -Value "`n# Azure Module Autoloader`n$importCmd"
-    Write-Host "Added 'Import-Module Az' to your PowerShell profile." -ForegroundColor Cyan
+if (Test-Path $PROFILE) {
+    $profileContent = Get-Content $PROFILE -Raw
+    if ($profileContent -notmatch "Import-Module\s+Az") {
+        Add-Content -Path $PROFILE -Value "`n# Azure Module Autoloader`n$importCmd"
+        Write-Host "Added 'Import-Module Az' to your PowerShell profile." -ForegroundColor Cyan
+    }
 }

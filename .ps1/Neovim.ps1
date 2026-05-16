@@ -1,10 +1,16 @@
-# Requires Administrator privileges to modify System PATH
+# Self-elevate to Administrator if not already elevated
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host "Administrator privileges required to modify System PATH. Elevating..." -ForegroundColor Yellow
+    Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+# 1. Download Neovim
 $neovimUrl = "https://github.com/neovim/neovim/releases/latest/download/nvim-win64.zip"
 $downloadPath = "$env:TEMP\nvim-win64.zip"
 $extractPath = "C:\Neovim"
 $binPath = "$extractPath\nvim-win64\bin"
 
-# 1. Download Neovim
 Write-Host "Downloading Neovim..." -ForegroundColor Cyan
 $oldProgress = $ProgressPreference
 $ProgressPreference = 'SilentlyContinue'
@@ -29,7 +35,8 @@ if ($path -notlike "*$binPath*") {
     [Environment]::SetEnvironmentVariable("Path", $newPath, "Machine")
     Write-Host "SUCCESS: Added Neovim to system PATH." -ForegroundColor Green
     Write-Host "Please restart your terminal (or run 'refreshenv') to use 'nvim'." -ForegroundColor Yellow
-} else {
+}
+else {
     Write-Host "Neovim path already exists in system PATH." -ForegroundColor Gray
 }
 
