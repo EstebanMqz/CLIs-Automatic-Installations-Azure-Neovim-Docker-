@@ -5,6 +5,9 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit
 }
 
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Inquire"
+
 # 1. Download Neovim
 $neovimUrl = "https://github.com/neovim/neovim/releases/latest/download/nvim-win64.zip"
 $downloadPath = "$env:TEMP\nvim-win64.zip"

@@ -1,11 +1,12 @@
-# Then, add the line `Import-Module -Name Az` to the profile script and save it. This way, the module will be imported every time you start a new PowerShell session, and autocompletion will be available without needing to import the module manually each time.
-# By following these steps, you can easily install a PowerShell module that provides autocompletion for commands and parameters, enhancing your productivity in the PowerShell console.
-# #Could you chain all the necessary commands together to install the module and enable autocompletion in one go?
-# Certainly! You can chain the necessary commands together in a single line to install the module, import it, and enable autocompletion. Here's how you can do it for the `Az` module but chained together.
+# Self-elevate to Administrator if not already elevated
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host "Administrator privileges required for Azure module setup. Requesting UAC..." -ForegroundColor Yellow
+    Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
 
-# Requires -RunAsAdministrator
 Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Inquire"
 
 Write-Host "Checking for Azure (Az) module..." -ForegroundColor Cyan
 

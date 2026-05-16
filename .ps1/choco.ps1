@@ -1,5 +1,13 @@
 #requires -RunAsAdministrator
-#Requires -Version 5.1
+# Self-elevate to Administrator if not already elevated
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host "Elevation required for Chocolatey installation. Requesting UAC..." -ForegroundColor Yellow
+    Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Inquire"
 
 <#
 .SYNOPSIS
