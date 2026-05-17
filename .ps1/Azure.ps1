@@ -26,9 +26,15 @@ $ErrorActionPreference = "Stop"
 Write-Host "Checking for Azure (Az) module..." -ForegroundColor Cyan
 
 try {
+    # Enforce TLS 1.2 to ensure a reliable connection to the PowerShell Gallery
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
     if (-not (Get-Module -Name Az -ListAvailable -ErrorAction SilentlyContinue)) {
         Write-Host "Ensuring NuGet provider is available..." -ForegroundColor Yellow
         Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force | Out-Null
+
+        Write-Host "Setting PSGallery to Trusted to prevent installation prompts..." -ForegroundColor Yellow
+        Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted -ErrorAction SilentlyContinue
         
         Write-Host "Installing Az module..." -ForegroundColor Yellow
         Install-Module -Name Az -AllowClobber -Scope AllUsers -Force -Confirm:$false
@@ -39,8 +45,10 @@ catch {
     exit 1
 }
 
-# 1. Correctly retrieve the module base path (using the first match if multiple exist)
-$azModule = Get-Module -Name Az -ListAvailable | Select-Object -First 1
+# 1. Correctly retrieve the module base path.
+# We sort by Version descending to ensure we get the latest installed version.
+# Accessing -ListAvailable ensures we look at the disk, even if not yet imported.
+$azModule = Get-Module -Name Az -ListAvailable | Sort-Object Version -Descending | Select-Object -First 1
 
 if ($null -eq $azModule) {
     Write-Error "Az module installation failed or could not be located."
@@ -50,7 +58,12 @@ if ($null -eq $azModule) {
 $azModulePath = $azModule.ModuleBase
 Write-Host "Az module located at: $azModulePath" -ForegroundColor Green
 
-# 2. Programmatically update the PowerShell Profile for persistence
+# 2. Verify and update the PowerShell Profile for persistence
+if (-not $PROFILE) {
+    Write-Warning "PowerShell profile is not defined in this host. Skipping profile update."
+    return
+}
+
 $profileDir = Split-Path -Parent $PROFILE
 if (-not (Test-Path $profileDir)) {
     New-Item -Path $profileDir -ItemType Directory -Force | Out-Null
@@ -68,3 +81,7 @@ if (Test-Path $PROFILE) {
         Write-Host "Added 'Import-Module Az -DisableNameChecking' to your PowerShell profile." -ForegroundColor Cyan
     }
 }
+
+Write-Host "`nSummary of installed Az submodules:" -ForegroundColor Cyan
+Get-Module -Name Az.* -ListAvailable | Select-Object Name, Version | Sort-Object Name | Format-Table
+Write-Host "Azure setup complete." -ForegroundColor Green

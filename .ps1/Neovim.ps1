@@ -37,6 +37,11 @@ $ProgressPreference = $oldProgress
 
 # 2. Remove old installation if exists
 if (Test-Path -Path $extractPath) {
+    if (Get-Process -Name nvim -ErrorAction SilentlyContinue) {
+        Write-Host "Closing running Neovim instances..." -ForegroundColor Yellow
+        Stop-Process -Name nvim -Force
+    }
+
     Write-Host "Cleaning up old installation at $extractPath..." -ForegroundColor Yellow
     Remove-Item -Path $extractPath -Recurse -Force -ErrorAction SilentlyContinue
 }
